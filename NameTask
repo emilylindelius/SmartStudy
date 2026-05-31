@@ -2,37 +2,58 @@ import javax.swing.*;
 import java.awt.event.*;
 
 public class TaskApp {
+
     public static void main(String[] args) {
 
-        JFrame frame = new JFrame("Study Planner - Task Input");
+        JFrame frame = new JFrame("Smart Study Planner");
         frame.setSize(400, 250);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(null);
 
-        JLabel label = new JLabel("Task Name:");
-        label.setBounds(50, 50, 100, 30);
+        // Task Name Label
+        JLabel taskLabel = new JLabel("Task Name:");
+        taskLabel.setBounds(30, 40, 100, 25);
 
+        // Task Name Text Field
         JTextField taskField = new JTextField();
-        taskField.setBounds(150, 50, 180, 30);
+        taskField.setBounds(120, 40, 200, 25);
 
+        // Priority Label
+        JLabel priorityLabel = new JLabel("Priority:");
+        priorityLabel.setBounds(30, 80, 100, 25);
+
+        // Priority Dropdown
+        String[] priorities = {"High", "Medium", "Low"};
+        JComboBox<String> priorityBox = new JComboBox<>(priorities);
+        priorityBox.setBounds(120, 80, 200, 25);
+
+        // Save Button
         JButton saveButton = new JButton("Save Task");
-        saveButton.setBounds(150, 100, 120, 30);
+        saveButton.setBounds(120, 130, 120, 30);
 
-        frame.add(label);
+        // Add Components to Window
+        frame.add(taskLabel);
         frame.add(taskField);
+        frame.add(priorityLabel);
+        frame.add(priorityBox);
         frame.add(saveButton);
 
+        // Save Button Action
         saveButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
 
-                String task = taskField.getText().trim();
+                String taskName = taskField.getText().trim();
 
-                if (task.isEmpty()) {
+                if (taskName.isEmpty()) {
                     JOptionPane.showMessageDialog(frame,
-                            "Task name is required!");
+                            "Please enter a task name.");
                 } else {
+
+                    String priority =
+                            (String) priorityBox.getSelectedItem();
+
                     JOptionPane.showMessageDialog(frame,
-                            "Task saved: " + task);
+                            "Task saved successfully.\nPriority: " + priority);
                 }
             }
         });
