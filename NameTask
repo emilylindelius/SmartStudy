@@ -1,0 +1,42 @@
+import javax.swing.*;
+import java.awt.event.*;
+
+public class TaskApp {
+    public static void main(String[] args) {
+
+        JFrame frame = new JFrame("Study Planner - Task Input");
+        frame.setSize(400, 250);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(null);
+
+        JLabel label = new JLabel("Task Name:");
+        label.setBounds(50, 50, 100, 30);
+
+        JTextField taskField = new JTextField();
+        taskField.setBounds(150, 50, 180, 30);
+
+        JButton saveButton = new JButton("Save Task");
+        saveButton.setBounds(150, 100, 120, 30);
+
+        frame.add(label);
+        frame.add(taskField);
+        frame.add(saveButton);
+
+        saveButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+
+                String task = taskField.getText().trim();
+
+                if (task.isEmpty()) {
+                    JOptionPane.showMessageDialog(frame,
+                            "Task name is required!");
+                } else {
+                    JOptionPane.showMessageDialog(frame,
+                            "Task saved: " + task);
+                }
+            }
+        });
+
+        frame.setVisible(true);
+    }
+}
