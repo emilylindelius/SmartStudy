@@ -1,44 +1,55 @@
 import javax.swing.*;
 import java.awt.event.*;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class TaskApp {
+
+    static DefaultListModel<String> taskListModel =
+            new DefaultListModel<String>();
 
     public static void main(String[] args) {
 
         JFrame frame = new JFrame("Smart Study Planner");
-        frame.setSize(400, 250);
+        frame.setSize(500, 400);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(null);
 
-        // Task Name Label
         JLabel taskLabel = new JLabel("Task Name:");
-        taskLabel.setBounds(30, 40, 100, 25);
+        taskLabel.setBounds(30, 30, 100, 25);
 
-        // Task Name Text Field
         JTextField taskField = new JTextField();
-        taskField.setBounds(120, 40, 200, 25);
+        taskField.setBounds(130, 30, 200, 25);
 
-        // Priority Label
         JLabel priorityLabel = new JLabel("Priority:");
-        priorityLabel.setBounds(30, 80, 100, 25);
+        priorityLabel.setBounds(30, 70, 100, 25);
 
-        // Priority Dropdown
         String[] priorities = {"High", "Medium", "Low"};
-        JComboBox<String> priorityBox = new JComboBox<>(priorities);
-        priorityBox.setBounds(120, 80, 200, 25);
+        JComboBox<String> priorityBox =
+                new JComboBox<String>(priorities);
+        priorityBox.setBounds(130, 70, 200, 25);
 
-        // Save Button
         JButton saveButton = new JButton("Save Task");
-        saveButton.setBounds(120, 130, 120, 30);
+        saveButton.setBounds(130, 110, 120, 30);
 
-        // Add Components to Window
+        JList<String> taskList =
+                new JList<String>(taskListModel);
+
+        JScrollPane scrollPane =
+                new JScrollPane(taskList);
+        scrollPane.setBounds(30, 160, 420, 150);
+
         frame.add(taskLabel);
         frame.add(taskField);
         frame.add(priorityLabel);
         frame.add(priorityBox);
         frame.add(saveButton);
+        frame.add(scrollPane);
 
-        // Save Button Action
+        loadTasks();
+
         saveButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
 
@@ -47,17 +58,115 @@ public class TaskApp {
                 if (taskName.isEmpty()) {
                     JOptionPane.showMessageDialog(frame,
                             "Please enter a task name.");
-                } else {
-
-                    String priority =
-                            (String) priorityBox.getSelectedItem();
-
-                    JOptionPane.showMessageDialog(frame,
-                            "Task saved successfully.\nPriority: " + priority);
+                    return;
                 }
+
+                String priority =
+                        (String) priorityBox.getSelectedItem();
+
+                String task =
+                        priority + " - " + taskName;
+
+                taskListModel.addElement(task);
+
+                sortTasks();
+                saveTasksToFile();
+
+                JOptionPane.showMessageDialog(frame,
+                        "Task saved successfully.");
+
+                taskField.setText("");
             }
         });
 
         frame.setVisible(true);
+    }
+
+    // SORT TASKS BY PRIORITY
+    public static void sortTasks() {
+
+        ArrayList<String> tasks = new ArrayList<String>();
+
+        for (int i = 0; i < taskListModel.size(); i++) {
+            tasks.add(taskListModel.getElementAt(i));
+        }
+
+        Collections.sort(tasks, new Comparator<String>() {
+            public int compare(String t1, String t2) {
+                return getPriorityValue(t1)
+                        - getPriorityValue(t2);
+            }
+        });
+
+        taskListModel.clear();
+
+        for (String task : tasks) {
+            taskListModel.addElement(task);
+        }
+    }
+
+    public static int getPriorityValue(String task) {
+
+        if (task.startsWith("High")) {
+            return 1;
+        }
+        if (task.startsWith("Medium")) {
+            return 2;
+        }
+        return 3;
+    }
+
+    // SAVE TO FILE
+    public static void saveTasksToFile() {
+
+        try {
+
+            FileWriter writer =
+                    new FileWriter("tasks.txt");
+
+            for (int i = 0; i < taskListModel.size(); i++) {
+
+                writer.write(taskListModel.getElementAt(i));
+                writer.write(System.lineSeparator());
+            }
+
+            writer.close();
+
+        } catch (IOException e) {
+
+            JOptionPane.showMessageDialog(null,
+                    "Error saving tasks.");
+        }
+    }
+
+    // LOAD FROM FILE
+    public static void loadTasks() {
+
+        try {
+
+            File file = new File("tasks.txt");
+
+            if (!file.exists()) {
+                return;
+            }
+
+            BufferedReader reader =
+                    new BufferedReader(new FileReader(file));
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                taskListModel.addElement(line);
+            }
+
+            reader.close();
+
+            sortTasks();
+
+        } catch (IOException e) {
+
+            JOptionPane.showMessageDialog(null,
+                    "Error loading tasks.");
+        }
     }
 }
