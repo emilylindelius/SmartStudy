@@ -1,9 +1,13 @@
+package Sprint1SmartStudy;
 import javax.swing.*;
 import java.awt.event.*;
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 
 public class TaskApp {
 
@@ -22,27 +26,45 @@ public class TaskApp {
 
         JTextField taskField = new JTextField();
         taskField.setBounds(130, 30, 200, 25);
+        
+        //I add the Due Date and Spinner
+        
+        JLabel dueDateLabel = new JLabel("Due Date:");
+        dueDateLabel.setBounds(30, 70, 100, 25);
+        
+        SpinnerDateModel dateModel = 
+        		new SpinnerDateModel(new Date(),
+        				null, null, Calendar.DAY_OF_MONTH);
+        JSpinner dateSpinner = new JSpinner(dateModel);
+        dateSpinner.setBounds(130, 70, 200, 25);
+        
+        JSpinner.DateEditor dateEditor =
+        		new JSpinner.DateEditor(dateSpinner, 
+        				"MM/dd/yyyy");
+        dateSpinner.setEditor(dateEditor);
 
         JLabel priorityLabel = new JLabel("Priority:");
-        priorityLabel.setBounds(30, 70, 100, 25);
+        priorityLabel.setBounds(30, 110, 100, 25);
 
         String[] priorities = {"High", "Medium", "Low"};
         JComboBox<String> priorityBox =
                 new JComboBox<String>(priorities);
-        priorityBox.setBounds(130, 70, 200, 25);
+        priorityBox.setBounds(130, 110, 200, 25);
 
         JButton saveButton = new JButton("Save Task");
-        saveButton.setBounds(130, 110, 120, 30);
+        saveButton.setBounds(130, 150, 120, 30);
 
         JList<String> taskList =
                 new JList<String>(taskListModel);
 
         JScrollPane scrollPane =
                 new JScrollPane(taskList);
-        scrollPane.setBounds(30, 160, 420, 150);
+        scrollPane.setBounds(30, 200, 420, 150);
 
         frame.add(taskLabel);
         frame.add(taskField);
+        frame.add(dueDateLabel);
+        frame.add(dateSpinner);
         frame.add(priorityLabel);
         frame.add(priorityBox);
         frame.add(saveButton);
@@ -63,9 +85,17 @@ public class TaskApp {
 
                 String priority =
                         (String) priorityBox.getSelectedItem();
-
+                
+                //Here is where to format the selected date
+                Date selectedDate =
+                		(Date) dateSpinner.getValue();
+                SimpleDateFormat sdf = 
+                		new SimpleDateFormat("MM/dd/yyyy");
+                String dueDate = sdf.format(selectedDate);
+                       
                 String task =
-                        priority + " - " + taskName;
+                        priority + " - " + taskName
+                        + "(Due: " + dueDate + ")";
 
                 taskListModel.addElement(task);
 
