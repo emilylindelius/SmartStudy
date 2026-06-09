@@ -1,93 +1,169 @@
-package SmartStudypackage;
+package Sprint1SmartStudy;
 
-import java.awt.EventQueue;
+import javax.swing.*;
+import java.awt.event.*;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
-import javax.swing.JTable;
-import javax.swing.JScrollBar;
-import javax.swing.JComboBox;
-import javax.swing.JButton;
+public class TaskGUI {
 
-public class GraphicalTaskDisplayPanel extends JFrame {
+    private ArrayList<Task> tasks =
+            new ArrayList<Task>();
 
-	private static final long serialVersionUID = 1L;
-	private JPanel contentPane;
-	private JTable table;
+    private DefaultListModel<String> listModel =
+            new DefaultListModel<String>();
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					GraphicalTaskDisplayPanel frame = new GraphicalTaskDisplayPanel();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+    public void launch() {
 
-	/**
-	 * Create the frame.
-	 */
-	public GraphicalTaskDisplayPanel() {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 892, 566);
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane);
-		contentPane.setLayout(null);
-		
-		JLabel lblNewLabel = new JLabel("Smart Study");
-		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		lblNewLabel.setBounds(0, 0, 73, 68);
-		contentPane.add(lblNewLabel);
-		
-		table = new JTable();
-		table.setBounds(0, 111, 853, 416);
-		contentPane.add(table);
-		
-		JScrollBar scrollBar = new JScrollBar();
-		scrollBar.setBounds(859, 0, 17, 516);
-		contentPane.add(scrollBar);
-		
-		JLabel lblNewLabel_1 = new JLabel("Task");
-		lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
-		lblNewLabel_1.setBounds(0, 96, 46, 14);
-		contentPane.add(lblNewLabel_1);
-		
-		JLabel lblNewLabel_1_1 = new JLabel("Due Date");
-		lblNewLabel_1_1.setHorizontalAlignment(SwingConstants.CENTER);
-		lblNewLabel_1_1.setBounds(305, 96, 64, 14);
-		contentPane.add(lblNewLabel_1_1);
-		
-		JLabel lblNewLabel_1_2 = new JLabel("Priority");
-		lblNewLabel_1_2.setHorizontalAlignment(SwingConstants.CENTER);
-		lblNewLabel_1_2.setBounds(442, 96, 46, 14);
-		contentPane.add(lblNewLabel_1_2);
-		
-		JLabel lblNewLabel_1_3 = new JLabel("Status");
-		lblNewLabel_1_3.setHorizontalAlignment(SwingConstants.CENTER);
-		lblNewLabel_1_3.setBounds(566, 96, 46, 14);
-		contentPane.add(lblNewLabel_1_3);
-		
-		String[] sortBy = {"Due Date", "Priority", "Status"};
-		JComboBox<String> sortByBox = 
-				new JComboBox<String>();
-		sortByBox.setBounds(678, 80, 73, 22);
-		contentPane.add(sortByBox);
-		
-		JButton btnNewButton = new JButton("Add Task");
-		btnNewButton.setBounds(761, 80, 89, 23);
-		contentPane.add(btnNewButton);
-		
+        JFrame frame =
+                new JFrame("Smart Study Planner");
+        frame.setSize(500, 450);
+        frame.setDefaultCloseOperation(
+                JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(null);
 
-	}
+        // AUTO SAVE ON CLOSE
+        frame.addWindowListener(
+                new WindowAdapter() {
+                    public void windowClosing(
+                            WindowEvent e) {
+                        TaskStorage.saveTasks(tasks);
+                    }
+                });
+
+        JLabel taskLabel =
+                new JLabel("Task Name:");
+        taskLabel.setBounds(30, 30, 100, 25);
+
+        JTextField taskField = new JTextField();
+        taskField.setBounds(130, 30, 200, 25);
+
+        JLabel dueDateLabel =
+                new JLabel("Due Date:");
+        dueDateLabel.setBounds(30, 70, 100, 25);
+
+        SpinnerDateModel dateModel =
+                new SpinnerDateModel(new Date(),
+                        null, null,
+                        Calendar.DAY_OF_MONTH);
+
+        JSpinner dateSpinner =
+                new JSpinner(dateModel);
+        dateSpinner.setBounds(130, 70, 200, 25);
+
+        JSpinner.DateEditor dateEditor =
+                new JSpinner.DateEditor(
+                        dateSpinner, "MM/dd/yyyy");
+        dateSpinner.setEditor(dateEditor);
+
+        JLabel priorityLabel =
+                new JLabel("Priority:");
+        priorityLabel.setBounds(30, 110, 100, 25);
+
+        String[] priorities =
+                {"High", "Medium", "Low"};
+        JComboBox<String> priorityBox =
+                new JComboBox<String>(priorities);
+        priorityBox.setBounds(130, 110, 200, 25);
+
+        JButton saveButton =
+                new JButton("Save Task");
+        saveButton.setBounds(130, 150, 120, 30);
+
+        JList<String> taskList =
+                new JList<String>(listModel);
+        JScrollPane scrollPane =
+                new JScrollPane(taskList);
+        scrollPane.setBounds(30, 200, 420, 150);
+
+        frame.add(taskLabel);
+        frame.add(taskField);
+        frame.add(dueDateLabel);
+        frame.add(dateSpinner);
+        frame.add(priorityLabel);
+        frame.add(priorityBox);
+        frame.add(saveButton);
+        frame.add(scrollPane);
+
+        // LOAD TASKS ON STARTUP
+        tasks = TaskStorage.loadTasks();
+        TaskSorter.sort(tasks);
+        refreshList();
+
+        saveButton.addActionListener(
+                new ActionListener() {
+                    public void actionPerformed(
+                            ActionEvent e) {
+
+                        String taskName =
+                                taskField.getText()
+                                        .trim();
+
+                        if (taskName.isEmpty()) {
+                            JOptionPane
+                                .showMessageDialog(
+                                    frame,
+                                    "Please enter "
+                                    + "a task name.");
+                            return;
+                        }
+
+                        String priority =
+                                (String) priorityBox
+                                .getSelectedItem();
+
+                        Date selectedDate =
+                                (Date) dateSpinner
+                                .getValue();
+                        SimpleDateFormat sdf =
+                                new SimpleDateFormat(
+                                        "MM/dd/yyyy");
+                        String dueDate =
+                                sdf.format(
+                                        selectedDate);
+
+                        SimpleDateFormat sdfNow =
+                                new SimpleDateFormat(
+                                        "MM/dd/yyyy");
+                        String createdAt =
+                                sdfNow.format(
+                                        new Date());
+
+                        Task task = new Task(
+                                taskName,
+                                priority,
+                                dueDate,
+                                "Pending",
+                                createdAt);
+
+                        tasks.add(task);
+                        TaskSorter.sort(tasks);
+                        TaskStorage.saveTasks(tasks);
+                        refreshList();
+
+                        JOptionPane
+                            .showMessageDialog(
+                                frame,
+                                "Task saved "
+                                + "successfully.");
+
+                        taskField.setText("");
+                    }
+                });
+
+        frame.setVisible(true);
+    }
+
+    // REFRESH JLIST FROM TASK ARRAYLIST
+    private void refreshList() {
+
+        listModel.clear();
+
+        for (Task task : tasks) {
+            listModel.addElement(
+                    task.toDisplayString());
+        }
+    }
 }
