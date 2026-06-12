@@ -3,9 +3,14 @@ package Sprint1SmartStudy;
 import javax.swing.*;
 import java.awt.event.*;
 import java.text.SimpleDateFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Properties;
+import org.jdatepicker.impl.JDatePanelImpl;
+import org.jdatepicker.impl.JDatePickerImpl;
+import org.jdatepicker.impl.UtilDateModel;
 
 public class TaskGUI {
 
@@ -15,10 +20,38 @@ public class TaskGUI {
     private DefaultListModel<String> listModel =
             new DefaultListModel<String>();
 
+    // Date formatter for calendar style
+    
+    class DateLabelFormatter
+    	extends JFormattedTextField.AbstractFormatter {
+    	
+    	private String datePattern = "MM/dd/yyyy";
+    	private SimpleDateFormat sdf = 
+    			new SimpleDateFormat(datePattern);
+    	@Override
+    	public Object stringToValue(String text)
+    			throws ParseException {
+    		return sdf.parse(text);
+    		
+    	}
+    	
+    	@Override 
+    	public String valueToString(Object value)
+    				throws ParseException{
+    		if (value != null) {
+    			Calendar cal = (Calendar) value;
+    			return sdf.format(
+    					cal.getTime());
+    		}
+    		return "";
+    	}
+    			
+    }
+    
     public void launch() {
 
         JFrame frame =
-                new JFrame("Smart Study Planner");
+                new JFrame("Smart Study");
         frame.setSize(500, 450);
         frame.setDefaultCloseOperation(
                 JFrame.EXIT_ON_CLOSE);
@@ -40,48 +73,63 @@ public class TaskGUI {
         JTextField taskField = new JTextField();
         taskField.setBounds(130, 30, 200, 25);
 
+        //Calendar format 
         JLabel dueDateLabel =
                 new JLabel("Due Date:");
         dueDateLabel.setBounds(30, 70, 100, 25);
-
-        SpinnerDateModel dateModel =
-                new SpinnerDateModel(new Date(),
-                        null, null,
-                        Calendar.DAY_OF_MONTH);
-
-        JSpinner dateSpinner =
-                new JSpinner(dateModel);
-        dateSpinner.setBounds(130, 70, 200, 25);
-
-        JSpinner.DateEditor dateEditor =
-                new JSpinner.DateEditor(
-                        dateSpinner, "MM/dd/yyyy");
-        dateSpinner.setEditor(dateEditor);
-
+        
+        UtilDateModel dateModel =
+        		new UtilDateModel();
+        dateModel.setDate(
+        		Calendar.getInstance()
+        				.get(Calendar.YEAR),
+        		Calendar.getInstance()
+        				.get(Calendar.MONTH),
+        		Calendar.getInstance()
+        				.get(Calendar.DAY_OF_MONTH));
+        dateModel.setSelected(true);
+        
+        Properties dateProperties = 
+        		new Properties();
+        dateProperties.put(
+        		"text.today", "Today");
+        dateProperties.put(
+        		"text.month", "Month");
+        dateProperties.put(
+        		"text.year", "Year");
+        
+        JDatePanelImpl datePanel =
+        		new JDatePanelImpl(dateModel,
+        				dateProperties);
+        JDatePickerImpl datePicker =
+        		new JDatePickerImpl(datePanel,
+        				new DateLabelFormatter());
+        datePicker.setBounds(130,70,200,30);
+            
         JLabel priorityLabel =
                 new JLabel("Priority:");
-        priorityLabel.setBounds(30, 110, 100, 25);
+        priorityLabel.setBounds(30, 115, 100, 25);
 
         String[] priorities =
                 {"High", "Medium", "Low"};
         JComboBox<String> priorityBox =
                 new JComboBox<String>(priorities);
-        priorityBox.setBounds(130, 110, 200, 25);
+        priorityBox.setBounds(130, 115, 200, 25);
 
         JButton saveButton =
                 new JButton("Save Task");
-        saveButton.setBounds(130, 150, 120, 30);
+        saveButton.setBounds(130, 155, 120, 30);
 
         JList<String> taskList =
                 new JList<String>(listModel);
         JScrollPane scrollPane =
                 new JScrollPane(taskList);
-        scrollPane.setBounds(30, 200, 420, 150);
+        scrollPane.setBounds(30, 205, 420, 180);
 
         frame.add(taskLabel);
         frame.add(taskField);
         frame.add(dueDateLabel);
-        frame.add(dateSpinner);
+        frame.add(datePicker);
         frame.add(priorityLabel);
         frame.add(priorityBox);
         frame.add(saveButton);
@@ -109,25 +157,38 @@ public class TaskGUI {
                                     + "a task name.");
                             return;
                         }
+                        
+                        // Get date from the calendar format
+                        Date selectDate = 
+                        		(Date) datePicker
+                        		.getModel()
+                        		.getValue();
+                        
+                        if (selectedDate == null) {
+                        	JOptionPane
+                        	.showMessageDialog(
+                        			Frame,
+                        			"Please select "
+                        			+ "a due date.");
+                        	return;
+                        	
+                        }
+                        
+                        SimpleDateFormat sdf = 
+                        		new SimpleDateFormat(
+                        				"MM/dd/yyyy");
+                        String dueDate =
+                        		sdf.format(selectDate);
 
                         String priority =
                                 (String) priorityBox
                                 .getSelectedItem();
 
-                        Date selectedDate =
-                                (Date) dateSpinner
-                                .getValue();
-                        SimpleDateFormat sdf =
+                       SimpleDateFormat sdfNow =
                                 new SimpleDateFormat(
                                         "MM/dd/yyyy");
-                        String dueDate =
-                                sdf.format(
-                                        selectedDate);
-
-                        SimpleDateFormat sdfNow =
-                                new SimpleDateFormat(
-                                        "MM/dd/yyyy");
-                        String createdAt =
+                       
+                       String createdAt =
                                 sdfNow.format(
                                         new Date());
 
@@ -157,6 +218,7 @@ public class TaskGUI {
     }
 
     // REFRESH JLIST FROM TASK ARRAYLIST
+    
     private void refreshList() {
 
         listModel.clear();
