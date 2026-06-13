@@ -164,10 +164,10 @@ public class TaskGUI {
                         		.getModel()
                         		.getValue();
                         
-                        if (selectedDate == null) {
+                        if (selectDate == null) {
                         	JOptionPane
                         	.showMessageDialog(
-                        			Frame,
+                        			frame,
                         			"Please select "
                         			+ "a due date.");
                         	return;
