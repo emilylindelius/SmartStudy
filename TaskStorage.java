@@ -48,6 +48,13 @@ public class TaskStorage {
                         + System.lineSeparator());
                 writer.write("---"
                         + System.lineSeparator());
+                
+                writer.write("category="
+                		+ task.getCategory()
+                		+ System.lineSeparator());
+                writer.write("---"
+                		+ System.lineSeparator());
+                
             }
 
             writer.flush();
@@ -86,6 +93,7 @@ public class TaskStorage {
             String dueDate   = "";
             String status    = "Pending";
             String createdAt = "";
+            String category  = "General";
 
             while ((line =
                     reader.readLine()) != null) {
@@ -115,6 +123,11 @@ public class TaskStorage {
                     createdAt =
                             line.substring(11);
 
+                } else if (line.startsWith(
+                			"category=")) {
+                	category = 
+                			line.substring(9);
+                	
                 } else if (line.equals("---")) {
 
                     if (!taskName.isEmpty()
@@ -126,7 +139,8 @@ public class TaskStorage {
                                 priority,
                                 dueDate,
                                 status,
-                                createdAt));
+                                createdAt,
+                                category));
                     }
 
                     taskName  = "";
@@ -134,6 +148,7 @@ public class TaskStorage {
                     dueDate   = "";
                     status    = "Pending";
                     createdAt = "";
+                    category  = "General";
                 }
             }
 
