@@ -64,7 +64,7 @@ public class TaskGUI {
                             WindowEvent e) {
                         TaskStorage.saveTasks(tasks);
                     }
-                });
+                });      
 
         JLabel taskLabel =
                 new JLabel("Task Name:");
@@ -115,16 +115,29 @@ public class TaskGUI {
         JComboBox<String> priorityBox =
                 new JComboBox<String>(priorities);
         priorityBox.setBounds(130, 115, 200, 25);
+        
+        
+        // Here I added the category label and DropDown
+        
+        JLabel categoryLabel = 
+        		new JLabel("Category:");
+        categoryLabel.setBounds(30, 155, 100, 25);
+        
+        String[] categories = 
+        	{"School", "Personal", "Appointments"};
+        JComboBox<String> categoryBox =
+        		new JComboBox<String>(categories);
+        categoryBox.setBounds(130, 155, 200, 25);    
 
         JButton saveButton =
                 new JButton("Save Task");
-        saveButton.setBounds(130, 155, 120, 30);
+        saveButton.setBounds(130, 195, 120, 30);
 
         JList<String> taskList =
                 new JList<String>(listModel);
         JScrollPane scrollPane =
                 new JScrollPane(taskList);
-        scrollPane.setBounds(30, 205, 420, 180);
+        scrollPane.setBounds(30, 240, 420, 160);
 
         frame.add(taskLabel);
         frame.add(taskField);
@@ -134,6 +147,8 @@ public class TaskGUI {
         frame.add(priorityBox);
         frame.add(saveButton);
         frame.add(scrollPane);
+        frame.add(categoryLabel);
+        frame.add(categoryBox);
 
         // LOAD TASKS ON STARTUP
         tasks = TaskStorage.loadTasks();
@@ -191,13 +206,30 @@ public class TaskGUI {
                        String createdAt =
                                 sdfNow.format(
                                         new Date());
+                       
+                       //Here I am validating the category for Sprint Mid 2
+                       String category = 
+                    		   (String) categoryBox
+                    		   .getSelectedItem();
+                       
+                       if (category == null
+                    		   || category.isEmpty()) {
+                    	   JOptionPane
+                    	   .showMessageDialog(
+                    			   frame,
+                    			   "Please select "
+                    			   + "a category.");
+                    	   return;
+                    	   
+                       }
 
                         Task task = new Task(
                                 taskName,
                                 priority,
                                 dueDate,
                                 "Pending",
-                                createdAt);
+                                createdAt,
+                                category);
 
                         tasks.add(task);
                         TaskSorter.sort(tasks);
