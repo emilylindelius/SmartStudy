@@ -55,10 +55,9 @@ public class Task {
     // CONVERTS TASK TO DISPLAY STRING FOR JLIST
     public String toDisplayString() {
 
-        String display = priority + " - "
-                + taskName
-                + " [" + category + "]"
-                + " (Due: " + dueDate + ")";
+        String display = priority + " | "
+                + dueDate + " | "
+                + taskName + " | ";
 
         if (status.equals("Done")) {
             display = display + " [Done]";
