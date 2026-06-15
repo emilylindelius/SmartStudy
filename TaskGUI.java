@@ -7,6 +7,9 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
@@ -19,6 +22,11 @@ public class TaskGUI {
 
     private DefaultListModel<String> listModel =
             new DefaultListModel<String>();
+    
+    // Filter dropdown field
+    private JComboBox<String> filterBox =
+    		new JComboBox<String>();
+    
 
     // Date formatter for calendar style
     
@@ -52,7 +60,7 @@ public class TaskGUI {
 
         JFrame frame =
                 new JFrame("Smart Study");
-        frame.setSize(500, 450);
+        frame.setSize(560, 490);
         frame.setDefaultCloseOperation(
                 JFrame.EXIT_ON_CLOSE);
         frame.setLayout(null);
@@ -127,17 +135,30 @@ public class TaskGUI {
         	{"School", "Personal", "Appointments"};
         JComboBox<String> categoryBox =
         		new JComboBox<String>(categories);
-        categoryBox.setBounds(130, 155, 200, 25);    
+        categoryBox.setBounds(130, 155, 200, 25);
+        
+        //Filter DropDown 
+        JLabel filterLabel = 
+        		new JLabel("Filter by:");
+        filterLabel.setBounds(360, 115, 80, 25);
+        
+        filterBox.setBounds(360, 155, 150, 25);
+        filterBox.addItem("All");
+        filterBox.addItem("School");
+        filterBox.addItem("Personal");
+        filterBox.addItem("Appointments");
+        
+        
 
         JButton saveButton =
                 new JButton("Save Task");
-        saveButton.setBounds(130, 195, 120, 30);
+        saveButton.setBounds(130, 200, 120, 30);
 
         JList<String> taskList =
                 new JList<String>(listModel);
         JScrollPane scrollPane =
                 new JScrollPane(taskList);
-        scrollPane.setBounds(30, 240, 420, 160);
+        scrollPane.setBounds(30, 245, 500, 190);
 
         frame.add(taskLabel);
         frame.add(taskField);
@@ -145,15 +166,26 @@ public class TaskGUI {
         frame.add(datePicker);
         frame.add(priorityLabel);
         frame.add(priorityBox);
-        frame.add(saveButton);
-        frame.add(scrollPane);
         frame.add(categoryLabel);
         frame.add(categoryBox);
-
+        frame.add(filterLabel);
+        frame.add(filterBox);
+        frame.add(saveButton);
+        frame.add(scrollPane);
+        
         // LOAD TASKS ON STARTUP
         tasks = TaskStorage.loadTasks();
         TaskSorter.sort(tasks);
         refreshList();
+        
+        //Filter Action Listener
+        filterBox.addActionListener(
+        		new ActionListener() {
+        			public void actionPerformed(
+        					ActionEvent e) {
+        				refreshList();
+        			}
+        		});
 
         saveButton.addActionListener(
                 new ActionListener() {
@@ -247,17 +279,91 @@ public class TaskGUI {
                 });
 
         frame.setVisible(true);
-    }
+    }               
 
-    // REFRESH JLIST FROM TASK ARRAYLIST
+    // Group tasks by category and applies filter selection
     
     private void refreshList() {
-
-        listModel.clear();
-
+    	
+    	listModel.clear();
+    	
+    	String selected = 
+    			(String) filterBox
+    			.getSelectedItem();
+    	Map<String, List<Task>> grouped =
+    			new LinkedHashMap<String, 
+    			List<Task>>();
+    	
         for (Task task : tasks) {
-            listModel.addElement(
-                    task.toDisplayString());
+        	
+        	//Here where will be applied filter logic
+        	if (selected != null
+        			&& !selected.equals("All")
+        			&& !task.getCategory()
+        			.equals(selected)) {
+        		continue;
+        	}
+        	
+        	// Group by category
+        	
+        	if (!grouped.containsKey(
+        			task.getCategory())) {
+        		grouped.put(
+        				task.getCategory(),
+        				new ArrayList<Task>());
+        	}
+        	grouped.get(task.getCategory())
+        	.add(task);
+        }
+        
+        //Display grouped tasks
+        
+        for (String cat : grouped.keySet()) {
+        	listModel.addElement(
+        			"====" + cat + "===");
+        	
+        	for (Task task:
+        			grouped.get(cat)) {
+        		listModel.addElement(
+        				"   "
+        				+ task.toDisplayString());
+        	}
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
