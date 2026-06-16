@@ -1,3 +1,4 @@
+package Sprint1SmartStudy;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
