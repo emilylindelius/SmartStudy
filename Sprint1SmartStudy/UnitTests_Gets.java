@@ -1,6 +1,6 @@
 package Sprint1SmartStudy;
 
-public class TaskTestManual {
+public class UnitTests_Gets {
 
     public static void main(String[] args) {
 
@@ -25,7 +25,8 @@ public class TaskTestManual {
                 "High",
                 "2026-06-10",
                 "Not Started",
-                "2026-06-01"
+                "2026-06-01",
+                "School"
         );
 
         // Call method
@@ -49,7 +50,8 @@ public class TaskTestManual {
                 "Medium",
                 "2026-06-15",
                 "In Progress",
-                "2026-06-01"
+                "2026-06-01",
+                "Appointments"
         );
 
         String result = task.getDueDate();
@@ -71,7 +73,8 @@ public class TaskTestManual {
                 "Low",
                 "2026-06-20",
                 "Completed",
-                "2026-06-01"
+                "2026-06-01",
+                "Personal"
         );
 
         String result = task.getStatus();
@@ -92,7 +95,8 @@ public class TaskTestManual {
                 "High",
                 "2026-06-12",
                 "Not Started",
-                "2026-06-01"
+                "2026-06-01",
+                "School"
         );
 
         String result = task.getCreatedAt();
