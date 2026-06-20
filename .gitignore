@@ -1,13 +1,15 @@
-/GraphicalTaskDisplayPanel.class
-/SmartStudyPlanner$Task.class
-/SmartStudyPlanner$TaskService.class
-/SmartStudyPlanner.class
-/Task.class
-/TaskApp.class
-/TaskAppTest$TestRunnable.class
-/TaskAppTest.class
-/TaskGUI$DateLabelFormatter.class
-/TaskGUI.class
-/TaskSorter.class
-/TaskStorage.class
-/TaskTestManual.class
+# Compiled output
+bin/
+*.class
+
+# Personal data files
+tasks.txt
+tasks_temp.txt
+
+# Eclipse workspace metadata
+.metadata/
+.settings/
+
+# OS specific files
+.DS_Store
+Thumbs.db
