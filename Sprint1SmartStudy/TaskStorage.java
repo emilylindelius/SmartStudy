@@ -52,6 +52,9 @@ public class TaskStorage {
                 writer.write("category="
                 		+ task.getCategory()
                 		+ System.lineSeparator());
+                writer.write("recurrence="
+                		+ task.getrecurrence()
+                		+ System.lineSeparator());
                 writer.write("---"
                 		+ System.lineSeparator());
                 
@@ -94,6 +97,7 @@ public class TaskStorage {
             String status    = "Pending";
             String createdAt = "";
             String category  = "General";
+            String recurrence = "None";
 
             while ((line =
                     reader.readLine()) != null) {
@@ -128,7 +132,13 @@ public class TaskStorage {
                 	category = 
                 			line.substring(9);
                 	
-                } else if (line.equals("---")) {
+                } else if (line.startsWith(
+                		"recurrence=")) {
+                	recurrence = 
+                			line.substring(11);
+                	
+                }
+                else if (line.equals("---")) {
 
                     if (!taskName.isEmpty()
                             && !priority.isEmpty()
@@ -140,15 +150,17 @@ public class TaskStorage {
                                 dueDate,
                                 status,
                                 createdAt,
-                                category));
+                                category,
+                                recurrence));
                     }
 
-                    taskName  = "";
-                    priority  = "";
-                    dueDate   = "";
-                    status    = "Pending";
-                    createdAt = "";
-                    category  = "General";
+                    taskName   = "";
+                    priority   = "";
+                    dueDate    = "";
+                    status     = "Pending";
+                    createdAt  = "";
+                    category   = "General";
+                    recurrence = "Nonse";
                 }
             }
 

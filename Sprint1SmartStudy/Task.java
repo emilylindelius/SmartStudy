@@ -8,10 +8,11 @@ public class Task {
     private String status;
     private String createdAt;
     private String category;
+    private String recurrence;
 
     public Task(String taskName, String priority,
                 String dueDate, String status,
-                String createdAt, String category) {
+                String createdAt, String category, String recurrence) {
 
         this.taskName  = taskName;
         this.priority  = priority;
@@ -19,6 +20,7 @@ public class Task {
         this.status    = status;
         this.createdAt = createdAt;
         this.category  = category;
+        this.recurrence = recurrence;
     }
     
 
@@ -44,6 +46,10 @@ public class Task {
     
     public String getCategory() {
     	return category;
+    }
+    
+    public String getrecurrence() {
+    	return recurrence;
     }
 
     public void setStatus(String status) {

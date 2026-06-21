@@ -258,7 +258,7 @@ public class GraphicalTaskDisplayPanel
 
         JDialog dialog = new JDialog(
                 this, "Add New Task", true);
-        dialog.setSize(360, 300);
+        dialog.setSize(360, 340);
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(null);
 
@@ -319,11 +319,27 @@ public class GraphicalTaskDisplayPanel
         categoryBox.setBounds(
                 130, 140, 190, 25);
         dialog.add(categoryBox);
+        
+        // Adding recurrence DropDown
+        
+        JLabel recurrenceLabel =
+        		new JLabel("Recurrence:");
+        recurrenceLabel.setBounds(
+        		20, 180, 100, 25);
+        dialog.add(recurrenceLabel);
+        
+        String[] recurrences =
+        	{"None", "Daily", "weekly"};
+        JComboBox<String> recurrenceBox =
+        		new JComboBox<String> (recurrences);
+        recurrenceBox.setBounds(
+        		130, 180, 190, 25);
+        dialog.add(recurrenceBox);
 
         JButton saveBtn =
                 new JButton("Save Task");
         saveBtn.setBounds(
-                115, 200, 130, 30);
+                115, 240, 130, 30);
         dialog.add(saveBtn);
 
         saveBtn.addActionListener(
@@ -370,6 +386,11 @@ public class GraphicalTaskDisplayPanel
                                 (String)
                                 categoryBox
                                 .getSelectedItem();
+                        
+                        String recurrence =
+                        		(String)
+                        		recurrenceBox
+                        		.getSelectedItem();
 
                         String createdAt =
                                 new SimpleDateFormat(
@@ -382,9 +403,17 @@ public class GraphicalTaskDisplayPanel
                                 dueDate,
                                 "Pending",
                                 createdAt,
-                                category);
+                                category, 
+                                recurrence);
 
                         tasks.add(task);
+                        
+                        // Generate recurring tasks
+                        
+                        TaskRecurrenceManager
+                        .generateRecurringTasks(
+                        		tasks, task);
+                        
                         TaskSorter.sort(
                                 tasks);
                         TaskStorage.saveTasks(
