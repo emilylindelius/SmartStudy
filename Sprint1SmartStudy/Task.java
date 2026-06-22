@@ -48,7 +48,7 @@ public class Task {
     	return category;
     }
     
-    public String getrecurrence() {
+    public String getRecurrence() {
     	return recurrence;
     }
 

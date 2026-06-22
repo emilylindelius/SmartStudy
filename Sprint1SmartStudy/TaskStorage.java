@@ -53,7 +53,7 @@ public class TaskStorage {
                 		+ task.getCategory()
                 		+ System.lineSeparator());
                 writer.write("recurrence="
-                		+ task.getrecurrence()
+                		+ task.getRecurrence()
                 		+ System.lineSeparator());
                 writer.write("---"
                 		+ System.lineSeparator());
