@@ -3,6 +3,7 @@ package Sprint1SmartStudy;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.EventQueue;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
@@ -17,7 +18,9 @@ public class GraphicalTaskDisplayPanel
 
     private JPanel contentPane;
     private JTable taskTable;
+    private JTable completedTable;
     private TaskTableModel tableModel;
+    private TaskTableModel completedModel;
     private TaskFilterSorter filterSorter;
     private ArrayList<Task> tasks;
 
@@ -44,7 +47,7 @@ public class GraphicalTaskDisplayPanel
         setTitle("Smart Study Planner");
         setDefaultCloseOperation(
                 JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 970, 560);
+        setBounds(100, 100, 970, 750);
 
         contentPane = new JPanel();
         contentPane.setBorder(
@@ -115,7 +118,16 @@ public class GraphicalTaskDisplayPanel
                 840, 50, 100, 25);
         contentPane.add(btnDeleteTask);
 
-        // JTABLE SETUP
+        // ACTIVE TASKS LABEL
+        JLabel lblActiveTasks =
+                new JLabel("Active Tasks");
+        lblActiveTasks.setFont(
+                lblActiveTasks.getFont()
+                .deriveFont(13f));
+        lblActiveTasks.setBounds(20, 115, 200, 20);
+        contentPane.add(lblActiveTasks);
+
+        // ACTIVE TASKS TABLE
         tableModel = new TaskTableModel();
         taskTable = new JTable(tableModel);
         taskTable.setSelectionMode(
@@ -128,13 +140,51 @@ public class GraphicalTaskDisplayPanel
         JScrollPane scrollPane =
                 new JScrollPane(taskTable);
         scrollPane.setBounds(
-                20, 120, 920, 400);
+                20, 138, 920, 250);
         contentPane.add(scrollPane);
+
+        // T-15 COMPLETED TASKS SECTION
+        JLabel lblCompletedTasks =
+                new JLabel("Completed Tasks");
+        lblCompletedTasks.setFont(
+                lblCompletedTasks.getFont()
+                .deriveFont(13f));
+        lblCompletedTasks.setForeground(
+                new Color(0, 128, 0));
+        lblCompletedTasks.setBounds(
+                20, 400, 200, 20);
+        contentPane.add(lblCompletedTasks);
+
+        // DELETE COMPLETED BUTTON
+        JButton btnDeleteCompleted =
+                new JButton("Delete Completed");
+        btnDeleteCompleted.setBounds(
+                840, 400, 100, 25);
+        contentPane.add(btnDeleteCompleted);
+
+        // T-15 COMPLETED TASKS TABLE
+        completedModel = new TaskTableModel();
+        completedTable = new JTable(
+                completedModel);
+        completedTable.setSelectionMode(
+                ListSelectionModel
+                .SINGLE_SELECTION);
+        completedTable.setRowHeight(24);
+        completedTable.getTableHeader()
+                .setReorderingAllowed(false);
+        completedTable.setBackground(
+                new Color(240, 255, 240));
+
+        JScrollPane completedScrollPane =
+                new JScrollPane(completedTable);
+        completedScrollPane.setBounds(
+                20, 425, 920, 250);
+        contentPane.add(completedScrollPane);
 
         // LOAD TASKS FROM FILE
         tasks = TaskStorage.loadTasks();
         TaskSorter.sort(tasks);
-        tableModel.setTasks(tasks);
+        refreshBothTables();
 
         // SETUP FILTER AND SORTER
         filterSorter = new TaskFilterSorter(
@@ -199,12 +249,12 @@ public class GraphicalTaskDisplayPanel
                         tasks.remove(modelRow);
                         TaskStorage.saveTasks(
                                 tasks);
-                        tableModel.setTasks(
-                                tasks);
+                        refreshBothTables();
                     }
                 });
 
         // MARK COMPLETE ACTION LISTENER
+        // T-15 MOVES TASK TO COMPLETED TABLE
         chckbxMarkComplete.addActionListener(
                 new ActionListener() {
                     public void actionPerformed(
@@ -221,24 +271,25 @@ public class GraphicalTaskDisplayPanel
                                     .convertRowIndexToModel(
                                             selectedRow);
 
-                            tableModel
-                                .updateStatus(
-                                    modelRow,
-                                    "Done");
+                            tasks.get(modelRow)
+                                .setStatus("Done");
 
                             TaskStorage.saveTasks(
-                                    tableModel
-                                    .getTasks());
+                                    tasks);
+
+                            refreshBothTables();
 
                             chckbxMarkComplete
-                                .setSelected(
-                                        false);
+                                .setSelected(false);
 
                             JOptionPane
                                 .showMessageDialog(
                                     null,
                                     "Task marked "
-                                    + "as complete.");
+                                    + "as complete "
+                                    + "and moved to "
+                                    + "Completed "
+                                    + "section.");
 
                         } else {
                             JOptionPane
@@ -251,6 +302,75 @@ public class GraphicalTaskDisplayPanel
                         }
                     }
                 });
+
+        // DELETE COMPLETED TASK LISTENER
+        btnDeleteCompleted.addActionListener(
+                new ActionListener() {
+                    public void actionPerformed(
+                            ActionEvent e) {
+
+                        int selectedRow =
+                                completedTable
+                                .getSelectedRow();
+
+                        if (selectedRow < 0) {
+                            JOptionPane
+                                .showMessageDialog(
+                                    null,
+                                    "Please select "
+                                    + "a completed "
+                                    + "task to delete.");
+                            return;
+                        }
+
+                        ArrayList<Task> completed =
+                                getCompletedTasks();
+
+                        Task toRemove =
+                                completed.get(
+                                        selectedRow);
+
+                        tasks.remove(toRemove);
+                        TaskStorage.saveTasks(
+                                tasks);
+                        refreshBothTables();
+                    }
+                });
+    }
+
+    // T-15 SEPARATES ACTIVE AND COMPLETED TASKS
+    private void refreshBothTables() {
+
+        ArrayList<Task> activeTasks =
+                new ArrayList<Task>();
+        ArrayList<Task> completedTasks =
+                new ArrayList<Task>();
+
+        for (Task task : tasks) {
+            if (task.getStatus().equals("Done")) {
+                completedTasks.add(task);
+            } else {
+                activeTasks.add(task);
+            }
+        }
+
+        tableModel.setTasks(activeTasks);
+        completedModel.setTasks(completedTasks);
+    }
+
+    // HELPER TO GET COMPLETED TASKS LIST
+    private ArrayList<Task> getCompletedTasks() {
+
+        ArrayList<Task> completedTasks =
+                new ArrayList<Task>();
+
+        for (Task task : tasks) {
+            if (task.getStatus().equals("Done")) {
+                completedTasks.add(task);
+            }
+        }
+
+        return completedTasks;
     }
 
     // OPENS A CLEAN POPUP TO ADD A TASK
@@ -264,20 +384,17 @@ public class GraphicalTaskDisplayPanel
 
         JLabel nameLabel =
                 new JLabel("Task Name:");
-        nameLabel.setBounds(
-                20, 20, 100, 25);
+        nameLabel.setBounds(20, 20, 100, 25);
         dialog.add(nameLabel);
 
         JTextField nameField =
                 new JTextField();
-        nameField.setBounds(
-                130, 20, 190, 25);
+        nameField.setBounds(130, 20, 190, 25);
         dialog.add(nameField);
 
         JLabel dateLabel =
                 new JLabel("Due Date:");
-        dateLabel.setBounds(
-                20, 60, 100, 25);
+        dateLabel.setBounds(20, 60, 100, 25);
         dialog.add(dateLabel);
 
         JTextField dateField =
@@ -285,8 +402,7 @@ public class GraphicalTaskDisplayPanel
                         new SimpleDateFormat(
                                 "MM/dd/yyyy")
                         .format(new Date()));
-        dateField.setBounds(
-                130, 60, 190, 25);
+        dateField.setBounds(130, 60, 190, 25);
         dialog.add(dateField);
 
         JLabel priorityLabel =
@@ -298,8 +414,7 @@ public class GraphicalTaskDisplayPanel
         String[] priorities =
                 {"High", "Medium", "Low"};
         JComboBox<String> priorityBox =
-                new JComboBox<String>(
-                        priorities);
+                new JComboBox<String>(priorities);
         priorityBox.setBounds(
                 130, 100, 190, 25);
         dialog.add(priorityBox);
@@ -314,32 +429,29 @@ public class GraphicalTaskDisplayPanel
                 {"School", "Personal",
                         "Appointments"};
         JComboBox<String> categoryBox =
-                new JComboBox<String>(
-                        categories);
+                new JComboBox<String>(categories);
         categoryBox.setBounds(
                 130, 140, 190, 25);
         dialog.add(categoryBox);
-        
-        // Adding recurrence DropDown
-        
+
+        // RECURRENCE DROPDOWN
         JLabel recurrenceLabel =
-        		new JLabel("Recurrence:");
+                new JLabel("Recurrence:");
         recurrenceLabel.setBounds(
-        		20, 180, 100, 25);
+                20, 180, 100, 25);
         dialog.add(recurrenceLabel);
-        
+
         String[] recurrences =
-        	{"None", "Daily", "weekly"};
+                {"None", "Daily", "Weekly"};
         JComboBox<String> recurrenceBox =
-        		new JComboBox<String> (recurrences);
+                new JComboBox<String>(recurrences);
         recurrenceBox.setBounds(
-        		130, 180, 190, 25);
+                130, 180, 190, 25);
         dialog.add(recurrenceBox);
 
         JButton saveBtn =
                 new JButton("Save Task");
-        saveBtn.setBounds(
-                115, 240, 130, 30);
+        saveBtn.setBounds(115, 240, 130, 30);
         dialog.add(saveBtn);
 
         saveBtn.addActionListener(
@@ -349,77 +461,62 @@ public class GraphicalTaskDisplayPanel
 
                         String name =
                                 nameField
-                                .getText()
-                                .trim();
+                                .getText().trim();
 
                         if (name.isEmpty()) {
                             JOptionPane
                                 .showMessageDialog(
                                     dialog,
                                     "Please enter "
-                                    + "a task "
-                                    + "name.");
+                                    + "a task name.");
                             return;
                         }
 
                         String dueDate =
                                 dateField
-                                .getText()
-                                .trim();
+                                .getText().trim();
 
                         if (dueDate.isEmpty()) {
                             JOptionPane
                                 .showMessageDialog(
                                     dialog,
                                     "Please enter "
-                                    + "a due "
-                                    + "date.");
+                                    + "a due date.");
                             return;
                         }
 
                         String priority =
-                                (String)
-                                priorityBox
+                                (String) priorityBox
                                 .getSelectedItem();
 
                         String category =
-                                (String)
-                                categoryBox
+                                (String) categoryBox
                                 .getSelectedItem();
-                        
+
                         String recurrence =
-                        		(String)
-                        		recurrenceBox
-                        		.getSelectedItem();
+                                (String) recurrenceBox
+                                .getSelectedItem();
 
                         String createdAt =
                                 new SimpleDateFormat(
                                         "MM/dd/yyyy")
-                                .format(
-                                        new Date());
+                                .format(new Date());
 
                         Task task = new Task(
                                 name, priority,
-                                dueDate,
-                                "Pending",
-                                createdAt,
-                                category, 
+                                dueDate, "Pending",
+                                createdAt, category,
                                 recurrence);
 
                         tasks.add(task);
-                        
-                        // Generate recurring tasks
-                        
+
                         TaskRecurrenceManager
-                        .generateRecurringTasks(
-                        		tasks, task);
-                        
-                        TaskSorter.sort(
-                                tasks);
-                        TaskStorage.saveTasks(
-                                tasks);
-                        tableModel.setTasks(
-                                tasks);
+                            .generateRecurringTasks(
+                                    tasks, task);
+
+                        TaskSorter.sort(tasks);
+                        TaskStorage.saveTasks(tasks);
+                        refreshBothTables();
 
                         dialog.dispose();
                     }
