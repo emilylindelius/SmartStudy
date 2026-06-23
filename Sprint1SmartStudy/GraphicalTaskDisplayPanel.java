@@ -359,7 +359,7 @@ public class GraphicalTaskDisplayPanel
     }
 
     // HELPER TO GET COMPLETED TASKS LIST
-    private ArrayList<Task> getCompletedTasks() {
+    ArrayList<Task> getCompletedTasks() {
 
         ArrayList<Task> completedTasks =
                 new ArrayList<Task>();
@@ -371,6 +371,47 @@ public class GraphicalTaskDisplayPanel
         }
 
         return completedTasks;
+    }
+
+    ArrayList<Task> getTasks() {
+        return tasks;
+    }
+
+    ArrayList<Task> getActiveTasks() {
+        ArrayList<Task> activeTasks =
+                new ArrayList<Task>();
+
+        for (Task task : tasks) {
+            if (!task.getStatus().equals("Done")) {
+                activeTasks.add(task);
+            }
+        }
+
+        return activeTasks;
+    }
+
+    int getActiveTaskCount() {
+        return tableModel.getRowCount();
+    }
+
+    int getCompletedTaskCount() {
+        return completedModel.getRowCount();
+    }
+
+    void setTasksForTest(ArrayList<Task> tasks) {
+        this.tasks = tasks;
+        refreshBothTables();
+    }
+
+    void addTaskForTest(Task task) {
+        tasks.add(task);
+        refreshBothTables();
+    }
+
+    void markTaskComplete(int modelRow) {
+        tasks.get(modelRow).setStatus("Done");
+        TaskStorage.saveTasks(tasks);
+        refreshBothTables();
     }
 
     // OPENS A CLEAN POPUP TO ADD A TASK
