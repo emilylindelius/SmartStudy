@@ -5,6 +5,7 @@ bin/
 # Personal data files
 tasks.txt
 tasks_temp.txt
+test-tasks.txt
 
 # Eclipse workspace metadata
 .metadata/
