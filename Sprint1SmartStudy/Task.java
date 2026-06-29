@@ -55,8 +55,10 @@ public class Task {
     public void setStatus(String status) {
         this.status = status;
     }
-    
-    
+    //Added for drag and drop rescheduling 
+    public void setDueDate(String dueDate) {
+        this.dueDate = dueDate;
+    }
 
     // CONVERTS TASK TO DISPLAY STRING FOR JLIST
     public String toDisplayString() {
@@ -68,7 +70,7 @@ public class Task {
         if (status.equals("Done")) {
             display = display + " [Done]";
         }
-
+        
         return display;
     }
 }

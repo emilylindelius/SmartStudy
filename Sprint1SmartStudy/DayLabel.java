@@ -13,7 +13,7 @@ public class DayLabel extends JLabel {
 	public DayLabel (String text, Color background, Color foreground, boolean btn) {
 		setText(text);
 		setHorizontalAlignment(JLabel.CENTER);
-		setFont(new Font("Helvetica", Font.PLAIN, 20));
+		setFont(new Font("Helvetica", Font.PLAIN, 15));
 		setOpaque(true);
 		setBackground(background);
 		setForeground(foreground);

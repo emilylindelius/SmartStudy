@@ -2,8 +2,8 @@ package Sprint1SmartStudy;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import java.awt.EventQueue;
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
@@ -22,7 +22,8 @@ public class GraphicalTaskDisplayPanel
     private TaskTableModel tableModel;
     private TaskTableModel completedModel;
     private TaskFilterSorter filterSorter;
-    private ArrayList<Task> tasks;
+    private ArrayList<Task> tasks =
+            new ArrayList<Task>();
 
     public static void main(String[] args) {
 
@@ -47,7 +48,7 @@ public class GraphicalTaskDisplayPanel
         setTitle("Smart Study Planner");
         setDefaultCloseOperation(
                 JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 970, 750);
+        setBounds(100, 100, 970, 800);
 
         contentPane = new JPanel();
         contentPane.setBorder(
@@ -99,8 +100,7 @@ public class GraphicalTaskDisplayPanel
         // ADD TASK BUTTON
         JButton btnAddTask =
                 new JButton("Add Task");
-        btnAddTask.setBounds(
-                840, 18, 100, 25);
+        btnAddTask.setBounds(840, 18, 100, 25);
         contentPane.add(btnAddTask);
 
         // MARK COMPLETE CHECKBOX
@@ -114,20 +114,17 @@ public class GraphicalTaskDisplayPanel
         // DELETE TASK BUTTON
         JButton btnDeleteTask =
                 new JButton("Delete Task");
-        btnDeleteTask.setBounds(
-                840, 50, 100, 25);
+        btnDeleteTask.setBounds(840, 50, 100, 25);
         contentPane.add(btnDeleteTask);
 
-        // ACTIVE TASKS LABEL
-        JLabel lblActiveTasks =
-                new JLabel("Active Tasks");
-        lblActiveTasks.setFont(
-                lblActiveTasks.getFont()
-                .deriveFont(13f));
-        lblActiveTasks.setBounds(20, 115, 200, 20);
-        contentPane.add(lblActiveTasks);
+        // DELETE COMPLETED BUTTON
+        JButton btnDeleteCompleted =
+                new JButton("Delete Completed");
+        btnDeleteCompleted.setBounds(
+                840, 82, 100, 25);
+        contentPane.add(btnDeleteCompleted);
 
-        // ACTIVE TASKS TABLE
+        // ACTIVE TASKS TABLE SETUP
         tableModel = new TaskTableModel();
         taskTable = new JTable(tableModel);
         taskTable.setSelectionMode(
@@ -137,32 +134,7 @@ public class GraphicalTaskDisplayPanel
         taskTable.getTableHeader()
                 .setReorderingAllowed(false);
 
-        JScrollPane scrollPane =
-                new JScrollPane(taskTable);
-        scrollPane.setBounds(
-                20, 138, 920, 250);
-        contentPane.add(scrollPane);
-
-        // T-15 COMPLETED TASKS SECTION
-        JLabel lblCompletedTasks =
-                new JLabel("Completed Tasks");
-        lblCompletedTasks.setFont(
-                lblCompletedTasks.getFont()
-                .deriveFont(13f));
-        lblCompletedTasks.setForeground(
-                new Color(0, 128, 0));
-        lblCompletedTasks.setBounds(
-                20, 400, 200, 20);
-        contentPane.add(lblCompletedTasks);
-
-        // DELETE COMPLETED BUTTON
-        JButton btnDeleteCompleted =
-                new JButton("Delete Completed");
-        btnDeleteCompleted.setBounds(
-                840, 400, 100, 25);
-        contentPane.add(btnDeleteCompleted);
-
-        // T-15 COMPLETED TASKS TABLE
+        // COMPLETED TASKS TABLE SETUP
         completedModel = new TaskTableModel();
         completedTable = new JTable(
                 completedModel);
@@ -175,16 +147,41 @@ public class GraphicalTaskDisplayPanel
         completedTable.setBackground(
                 new Color(240, 255, 240));
 
+        // TABBED PANEL FOR ALL VIEWS
+        JTabbedPane tabbedPane =
+                new JTabbedPane();
+        tabbedPane.setBounds(
+                50, 100, 850, 400);
+        contentPane.add(tabbedPane);
+
+        // ACTIVE TASKS TAB
+        JScrollPane scrollPane =
+                new JScrollPane(taskTable);
+        tabbedPane.addTab(
+                "Active Tasks", scrollPane);
+
+        // COMPLETED TASKS TAB
         JScrollPane completedScrollPane =
                 new JScrollPane(completedTable);
-        completedScrollPane.setBounds(
-                20, 425, 920, 250);
-        contentPane.add(completedScrollPane);
+        tabbedPane.addTab(
+                "Completed Tasks",
+                completedScrollPane);
 
-        // LOAD TASKS FROM FILE
+        // LOAD TASKS FROM FILE BEFORE
+        // BUILDING CALENDAR
         tasks = TaskStorage.loadTasks();
         TaskSorter.sort(tasks);
         refreshBothTables();
+
+        // CALENDAR TAB - T-20 AND T-21
+        TaskScheduler scheduler =
+                new TaskScheduler(tasks);
+        JPanel calendarPanel =
+                MainInterface.buildCalendarPanel(
+                        tasks, scheduler,
+                        tableModel);
+        tabbedPane.addTab(
+                "Calendar", calendarPanel);
 
         // SETUP FILTER AND SORTER
         filterSorter = new TaskFilterSorter(
@@ -221,7 +218,7 @@ public class GraphicalTaskDisplayPanel
                     }
                 });
 
-        // DELETE TASK ACTION LISTENER
+        // DELETE ACTIVE TASK ACTION LISTENER
         btnDeleteTask.addActionListener(
                 new ActionListener() {
                     public void actionPerformed(
@@ -246,7 +243,10 @@ public class GraphicalTaskDisplayPanel
                                 .convertRowIndexToModel(
                                         selectedRow);
 
-                        tasks.remove(modelRow);
+                        ArrayList<Task> active =
+                                getActiveTasks();
+                        tasks.remove(
+                                active.get(modelRow));
                         TaskStorage.saveTasks(
                                 tasks);
                         refreshBothTables();
@@ -254,7 +254,6 @@ public class GraphicalTaskDisplayPanel
                 });
 
         // MARK COMPLETE ACTION LISTENER
-        // T-15 MOVES TASK TO COMPLETED TABLE
         chckbxMarkComplete.addActionListener(
                 new ActionListener() {
                     public void actionPerformed(
@@ -271,12 +270,13 @@ public class GraphicalTaskDisplayPanel
                                     .convertRowIndexToModel(
                                             selectedRow);
 
-                            tasks.get(modelRow)
+                            ArrayList<Task> active =
+                                    getActiveTasks();
+                            active.get(modelRow)
                                 .setStatus("Done");
 
                             TaskStorage.saveTasks(
                                     tasks);
-
                             refreshBothTables();
 
                             chckbxMarkComplete
@@ -319,18 +319,16 @@ public class GraphicalTaskDisplayPanel
                                     null,
                                     "Please select "
                                     + "a completed "
-                                    + "task to delete.");
+                                    + "task to "
+                                    + "delete.");
                             return;
                         }
 
                         ArrayList<Task> completed =
                                 getCompletedTasks();
-
-                        Task toRemove =
+                        tasks.remove(
                                 completed.get(
-                                        selectedRow);
-
-                        tasks.remove(toRemove);
+                                        selectedRow));
                         TaskStorage.saveTasks(
                                 tasks);
                         refreshBothTables();
@@ -338,7 +336,7 @@ public class GraphicalTaskDisplayPanel
                 });
     }
 
-    // T-15 SEPARATES ACTIVE AND COMPLETED TASKS
+    // T-15 SEPARATES ACTIVE AND COMPLETED
     private void refreshBothTables() {
 
         ArrayList<Task> activeTasks =
@@ -347,7 +345,8 @@ public class GraphicalTaskDisplayPanel
                 new ArrayList<Task>();
 
         for (Task task : tasks) {
-            if (task.getStatus().equals("Done")) {
+            if (task.getStatus()
+                    .equals("Done")) {
                 completedTasks.add(task);
             } else {
                 activeTasks.add(task);
@@ -358,14 +357,14 @@ public class GraphicalTaskDisplayPanel
         completedModel.setTasks(completedTasks);
     }
 
-    // HELPER TO GET COMPLETED TASKS LIST
     ArrayList<Task> getCompletedTasks() {
 
         ArrayList<Task> completedTasks =
                 new ArrayList<Task>();
 
         for (Task task : tasks) {
-            if (task.getStatus().equals("Done")) {
+            if (task.getStatus()
+                    .equals("Done")) {
                 completedTasks.add(task);
             }
         }
@@ -378,11 +377,13 @@ public class GraphicalTaskDisplayPanel
     }
 
     ArrayList<Task> getActiveTasks() {
+
         ArrayList<Task> activeTasks =
                 new ArrayList<Task>();
 
         for (Task task : tasks) {
-            if (!task.getStatus().equals("Done")) {
+            if (!task.getStatus()
+                    .equals("Done")) {
                 activeTasks.add(task);
             }
         }
@@ -398,7 +399,8 @@ public class GraphicalTaskDisplayPanel
         return completedModel.getRowCount();
     }
 
-    void setTasksForTest(ArrayList<Task> tasks) {
+    void setTasksForTest(
+            ArrayList<Task> tasks) {
         this.tasks = tasks;
         refreshBothTables();
     }
@@ -409,7 +411,8 @@ public class GraphicalTaskDisplayPanel
     }
 
     void markTaskComplete(int modelRow) {
-        tasks.get(modelRow).setStatus("Done");
+        getActiveTasks().get(modelRow)
+                .setStatus("Done");
         TaskStorage.saveTasks(tasks);
         refreshBothTables();
     }
@@ -556,7 +559,8 @@ public class GraphicalTaskDisplayPanel
                                     tasks, task);
 
                         TaskSorter.sort(tasks);
-                        TaskStorage.saveTasks(tasks);
+                        TaskStorage.saveTasks(
+                                tasks);
                         refreshBothTables();
 
                         dialog.dispose();
