@@ -9,6 +9,8 @@ import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.awt.Font;
+import javax.swing.BorderFactory;
 
 public class GraphicalTaskDisplayPanel
         extends JFrame {
@@ -45,12 +47,14 @@ public class GraphicalTaskDisplayPanel
 
     public GraphicalTaskDisplayPanel() {
 
-        setTitle("Smart Study Planner");
+        setTitle("SmartStudy");
         setDefaultCloseOperation(
                 JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 970, 800);
 
         contentPane = new JPanel();
+        contentPane.setBackground(
+        		new Color(245, 247, 250));
         contentPane.setBorder(
                 new EmptyBorder(5, 5, 5, 5));
         setContentPane(contentPane);
@@ -58,19 +62,22 @@ public class GraphicalTaskDisplayPanel
 
         // APP TITLE
         JLabel lblTitle =
-                new JLabel("Smart Study");
+                new JLabel("SmartStudy");
         lblTitle.setHorizontalAlignment(
-                SwingConstants.CENTER);
-        lblTitle.setFont(
-                lblTitle.getFont()
-                .deriveFont(16f));
-        lblTitle.setBounds(20, 15, 200, 30);
+                SwingConstants.LEFT);
+        lblTitle.setFont( 
+        		new Font(
+        		"Helvetica",
+        		Font.BOLD,22));       
+        lblTitle.setForeground(
+        		new Color(33, 90, 168));
+        lblTitle.setBounds(20,15,300, 35);
         contentPane.add(lblTitle);
 
         // SORT DROPDOWN
         JLabel lblSort =
                 new JLabel("Sort by:");
-        lblSort.setBounds(600, 18, 60, 22);
+        lblSort.setBounds(500, 18, 60, 22);
         contentPane.add(lblSort);
 
         JComboBox<String> sortbyBox =
@@ -78,13 +85,17 @@ public class GraphicalTaskDisplayPanel
         sortbyBox.addItem("Due Date");
         sortbyBox.addItem("Priority");
         sortbyBox.addItem("Status");
-        sortbyBox.setBounds(665, 18, 120, 22);
+        sortbyBox.setBounds(565, 18, 120, 22);
+        sortbyBox.setFont(new Font(
+        		"Helvetica",
+        		Font.PLAIN,
+        		12));
         contentPane.add(sortbyBox);
 
         // FILTER DROPDOWN
         JLabel lblFilter =
                 new JLabel("Filter by:");
-        lblFilter.setBounds(600, 50, 65, 22);
+        lblFilter.setBounds(500, 50, 65, 22);
         contentPane.add(lblFilter);
 
         JComboBox<String> filterbyBox =
@@ -94,13 +105,24 @@ public class GraphicalTaskDisplayPanel
         filterbyBox.addItem("Medium Priority");
         filterbyBox.addItem("Low Priority");
         filterbyBox.addItem("Due Today");
-        filterbyBox.setBounds(665, 50, 150, 22);
+        filterbyBox.setBounds(565, 50, 120, 22);
+        filterbyBox.setFont(new Font(
+        		"Helvetica",
+        		Font.PLAIN,
+        		12));
         contentPane.add(filterbyBox);
 
         // ADD TASK BUTTON
         JButton btnAddTask =
                 new JButton("Add Task");
-        btnAddTask.setBounds(840, 18, 100, 25);
+        btnAddTask.setBounds(760, 18, 140, 25);
+        btnAddTask.setBackground(
+        		new Color(33, 90, 168));
+        btnAddTask.setForeground(Color.WHITE);
+        btnAddTask.setFocusPainted(false);
+        btnAddTask.setBorder(
+        		BorderFactory.createEmptyBorder(
+        				5, 10, 5, 10));
         contentPane.add(btnAddTask);
 
         // MARK COMPLETE CHECKBOX
@@ -108,20 +130,29 @@ public class GraphicalTaskDisplayPanel
                 new JCheckBox(
                         "Mark Task as Complete");
         chckbxMarkComplete.setBounds(
-                665, 82, 250, 23);
+                500, 82, 170, 23);
         contentPane.add(chckbxMarkComplete);
 
         // DELETE TASK BUTTON
         JButton btnDeleteTask =
                 new JButton("Delete Task");
-        btnDeleteTask.setBounds(840, 50, 100, 25);
+        btnDeleteTask.setBounds(760, 50, 140, 25);
+        btnDeleteTask.setBackground(
+        		new Color(200, 50, 50));
+        btnDeleteTask.setForeground(Color.WHITE);
+        btnDeleteTask.setFocusPainted(false);
         contentPane.add(btnDeleteTask);
 
         // DELETE COMPLETED BUTTON
         JButton btnDeleteCompleted =
                 new JButton("Delete Completed");
         btnDeleteCompleted.setBounds(
-                840, 82, 100, 25);
+                760, 82, 140, 25);
+        btnDeleteCompleted.setBackground(
+        		new Color(150, 50, 50));
+        btnDeleteCompleted.setForeground(
+        		Color.WHITE);
+        btnDeleteCompleted.setFocusPainted(false);
         contentPane.add(btnDeleteCompleted);
 
         // ACTIVE TASKS TABLE SETUP
@@ -131,6 +162,25 @@ public class GraphicalTaskDisplayPanel
                 ListSelectionModel
                 .SINGLE_SELECTION);
         taskTable.setRowHeight(24);
+        taskTable.setFont( new Font(
+        		"Helvetica", 
+        		Font.PLAIN, 13));
+        taskTable.getTableHeader() .setFont(
+        		new Font(
+        				"Helevetica",
+        				Font.BOLD,
+        				13));
+        taskTable.getTableHeader().setBackground(
+        		new Color(33, 90, 168));
+        taskTable.getTableHeader().setForeground(
+        		Color.WHITE);
+        taskTable.setGridColor(
+        		new Color(220, 220, 220));
+        taskTable.setSelectionBackground(
+        		new Color(173, 216, 230));
+        taskTable.setSelectionForeground(
+        		Color.BLACK);
+        taskTable.setBackground(Color.WHITE);
         taskTable.getTableHeader()
                 .setReorderingAllowed(false);
 
@@ -146,12 +196,39 @@ public class GraphicalTaskDisplayPanel
                 .setReorderingAllowed(false);
         completedTable.setBackground(
                 new Color(240, 255, 240));
+        completedTable.setFont(new Font (
+        		"Helevetica",
+        		Font.PLAIN,
+        		13));
+        completedTable.getTableHeader().setFont(
+        		new Font(
+        				"Helvetica",
+        				Font.BOLD,
+        				13));
+        completedTable.getTableHeader()
+        		.setBackground(new Color
+        				(0, 128, 0));
+        completedTable.getTableHeader()
+        			.setForeground(Color.WHITE);
+        completedTable.setGridColor(
+        		new Color(220, 220, 220));
+        completedTable.setSelectionBackground(
+        		new Color(144, 238, 144));
+        completedTable.setSelectionForeground(
+        		Color.BLACK);
+        
 
         // TABBED PANEL FOR ALL VIEWS
         JTabbedPane tabbedPane =
                 new JTabbedPane();
         tabbedPane.setBounds(
                 50, 100, 850, 400);
+        tabbedPane.setFont(new Font (
+        		"Helvetica",
+        		Font.BOLD,
+        		13));
+        tabbedPane.setBackground(
+        		new Color(245, 247, 250));
         contentPane.add(tabbedPane);
 
         // ACTIVE TASKS TAB
@@ -195,6 +272,7 @@ public class GraphicalTaskDisplayPanel
                         filterSorter.applySort(
                                 (String) sortbyBox
                                 .getSelectedItem());
+                        
                     }
                 });
 
@@ -206,7 +284,9 @@ public class GraphicalTaskDisplayPanel
                         filterSorter.applyFilter(
                                 (String) filterbyBox
                                 .getSelectedItem());
+                       
                     }
+
                 });
 
         // ADD TASK ACTION LISTENER
