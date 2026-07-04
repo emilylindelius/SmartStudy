@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.awt.Font;
 import javax.swing.BorderFactory;
+import javax.swing.table.DefaultTableCellRenderer;
 
 public class GraphicalTaskDisplayPanel
         extends JFrame {
@@ -68,10 +69,10 @@ public class GraphicalTaskDisplayPanel
         lblTitle.setFont( 
         		new Font(
         		"Helvetica",
-        		Font.BOLD,22));       
+        		Font.BOLD,40));       
         lblTitle.setForeground(
         		new Color(33, 90, 168));
-        lblTitle.setBounds(20,15,300, 35);
+        lblTitle.setBounds(100,30,300, 50);
         contentPane.add(lblTitle);
 
         // SORT DROPDOWN
@@ -183,6 +184,7 @@ public class GraphicalTaskDisplayPanel
         taskTable.setBackground(Color.WHITE);
         taskTable.getTableHeader()
                 .setReorderingAllowed(false);
+        centerAlignTable(taskTable);
 
         // COMPLETED TASKS TABLE SETUP
         completedModel = new TaskTableModel();
@@ -216,6 +218,7 @@ public class GraphicalTaskDisplayPanel
         		new Color(144, 238, 144));
         completedTable.setSelectionForeground(
         		Color.BLACK);
+        centerAlignTable(completedTable);
         
 
         // TABBED PANEL FOR ALL VIEWS
@@ -495,6 +498,22 @@ public class GraphicalTaskDisplayPanel
                 .setStatus("Done");
         TaskStorage.saveTasks(tasks);
         refreshBothTables();
+    }
+    //Center align all table columns
+    private void centerAlignTable(JTable table) {
+    	
+    	DefaultTableCellRenderer centerRenderer =
+    			new DefaultTableCellRenderer();
+    	centerRenderer.setHorizontalAlignment(
+    			JLabel.CENTER);
+    	
+    	for (int i = 0; i < table.getColumnCount();
+    			i++) {
+    		table.getColumnModel()
+    				.getColumn(i)
+    				.setCellRenderer(centerRenderer);
+    	}
+    			
     }
 
     // OPENS A CLEAN POPUP TO ADD A TASK
