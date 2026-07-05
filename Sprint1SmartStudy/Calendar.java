@@ -1,5 +1,8 @@
 package Sprint1SmartStudy;
 
+import javax.swing.JDialog;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -338,11 +341,12 @@ public class Calendar extends JPanel {
                     new MouseListener() {
                         public void mouseClicked(
                                 MouseEvent e) {
+
+                            // UPDATE SELECTED DAY
                             mainPanel.removeAll();
                             LocalDate selected =
                                     LocalDate.of(
-                                    year, month,
-                                    day);
+                                    year, month, day);
                             mainPanel.add(
                                 new Calendar(
                                     year, month,
@@ -353,6 +357,11 @@ public class Calendar extends JPanel {
                                     tableModel));
                             mainPanel.revalidate();
                             mainPanel.repaint();
+
+                            // T-22 OPEN DAILY VIEW
+                            showDailyView(
+                                    year, month, day,
+                                    scheduler);
                         }
                         public void mouseReleased(
                                 MouseEvent e) {}
@@ -376,4 +385,135 @@ public class Calendar extends JPanel {
 
         add(days, BorderLayout.CENTER);
     }
+    // Daily View Panel
+    private void showDailyView(
+    		int year, int month, int day,
+    		TaskScheduler scheduler) {
+    	
+    	String dateStr = String.format(
+    			"%02d/%02d/%04d", 
+    			month, day, year);
+    	
+    	ArrayList<Task> dayTasks =
+    			scheduler.getTasksForDate(dateStr);
+    //Sort by Priority 
+    dayTasks.sort((t1, t2) ->{
+    	int p1 = getPriorityValue(t1);
+    	int p2 = getPriorityValue(t2);
+    	return Integer.compare(p1, p2);
+    });
+    
+    JDialog dailyDialog = new JDialog();
+    dailyDialog.setTitle(
+            "Tasks for " + dateStr);
+    dailyDialog.setSize(500, 400);
+    dailyDialog.setLocationRelativeTo(this);
+    dailyDialog.setLayout(
+            new java.awt.BorderLayout());
+
+    // HEADER
+    JPanel header = new JPanel();
+    header.setBackground(
+            new Color(33, 90, 168));
+    header.setPreferredSize(
+            new java.awt.Dimension(500, 50));
+    header.setLayout(null);
+
+    JLabel headerLabel = new JLabel(
+            "Daily View - " + dateStr);
+    headerLabel.setForeground(Color.WHITE);
+    headerLabel.setFont(new java.awt.Font(
+            "Helvetica",
+            java.awt.Font.BOLD, 16));
+    headerLabel.setBounds(15, 12, 400, 25);
+    header.add(headerLabel);
+    dailyDialog.add(header,
+            java.awt.BorderLayout.NORTH);
+
+    if (dayTasks.isEmpty()) {
+
+        JLabel noTasks = new JLabel(
+                "No tasks scheduled for "
+                + "this day.");
+        noTasks.setHorizontalAlignment(
+                JLabel.CENTER);
+        noTasks.setFont(new java.awt.Font(
+                "Helvetica",
+                java.awt.Font.PLAIN, 14));
+        dailyDialog.add(noTasks,
+                java.awt.BorderLayout.CENTER);
+
+    } else {
+
+        // TASK TABLE FOR DAILY VIEW
+        String[] columns = {
+                "Task", "Priority",
+                "Status", "Category"};
+
+        Object[][] data =
+                new Object[dayTasks.size()][4];
+
+        for (int i = 0;
+                i < dayTasks.size(); i++) {
+            Task t = dayTasks.get(i);
+            data[i][0] = t.getTaskName();
+            data[i][1] = t.getPriority();
+            data[i][2] = t.getStatus();
+            data[i][3] = t.getCategory();
+        }
+
+        JTable dailyTable = new JTable(
+                data, columns);
+        dailyTable.setRowHeight(28);
+        dailyTable.setFont(
+                new java.awt.Font(
+                        "Helvetica",
+                        java.awt.Font.PLAIN, 13));
+        dailyTable.getTableHeader().setFont(
+                new java.awt.Font(
+                        "Helvetica",
+                        java.awt.Font.BOLD, 13));
+        dailyTable.getTableHeader()
+                .setBackground(
+                new Color(33, 90, 168));
+        dailyTable.getTableHeader()
+                .setForeground(Color.WHITE);
+        dailyTable.setEnabled(false);
+
+        // CENTER ALIGN COLUMNS
+        javax.swing.table
+                .DefaultTableCellRenderer
+                centerRenderer =
+                new javax.swing.table
+                .DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(
+                JLabel.CENTER);
+        for (int i = 0;
+                i < dailyTable
+                .getColumnCount(); i++) {
+            dailyTable.getColumnModel()
+                    .getColumn(i)
+                    .setCellRenderer(
+                            centerRenderer);
+        }
+
+        JScrollPane dailyScroll =
+                new JScrollPane(dailyTable);
+        dailyDialog.add(dailyScroll,
+                java.awt.BorderLayout.CENTER);
+    }
+
+    dailyDialog.setVisible(true);
+}
+
+// PRIORITY VALUE HELPER
+private int getPriorityValue(Task task) {
+    if (task.getPriority().equals("High")) {
+        return 1;
+    }
+    if (task.getPriority().equals("Medium")) {
+        return 2;
+    }
+    return 3;
+}
 }
