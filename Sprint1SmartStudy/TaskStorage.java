@@ -12,13 +12,54 @@ public class TaskStorage {
             "tasks.txt";
     private static final String TEMP_FILE_NAME =
             "tasks_temp.txt";
+    private static final String APP_FOLDER_NAME =
+            "SmartStudy";
+
+    public static File getStorageDirectory() {
+        String appData = System.getenv("APPDATA");
+        File baseDirectory;
+
+        if (appData != null && !appData.isEmpty()) {
+            baseDirectory = new File(appData, APP_FOLDER_NAME);
+        } else {
+            baseDirectory = new File(
+                    System.getProperty("user.home"),
+                    ".smartstudy");
+        }
+
+        if (!baseDirectory.exists()) {
+            baseDirectory.mkdirs();
+        }
+
+        return baseDirectory;
+    }
+
+    public static File getStorageFile() {
+        File preferredFile = new File(
+                getStorageDirectory(), FILE_NAME);
+        File legacyFile = new File(FILE_NAME);
+
+        if (preferredFile.exists()) {
+            return preferredFile;
+        }
+
+        if (legacyFile.exists()) {
+            return legacyFile;
+        }
+
+        return preferredFile;
+    }
+
+    public static File getTempStorageFile() {
+        return new File(getStorageDirectory(), TEMP_FILE_NAME);
+    }
 
     // SAVE ALL TASKS TO STRUCTURED TEXT FILE
     public static void saveTasks(
             ArrayList<Task> tasks) {
 
-        File tempFile = new File(TEMP_FILE_NAME);
-        File realFile = new File(FILE_NAME);
+        File tempFile = getTempStorageFile();
+        File realFile = getStorageFile();
 
         try (FileWriter writer =
                      new FileWriter(tempFile)) {
@@ -80,7 +121,7 @@ public class TaskStorage {
         ArrayList<Task> tasks =
                 new ArrayList<Task>();
 
-        File file = new File(FILE_NAME);
+        File file = getStorageFile();
 
         if (!file.exists()) {
             return tasks;

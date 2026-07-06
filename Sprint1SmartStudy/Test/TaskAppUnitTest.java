@@ -1,5 +1,8 @@
-package Sprint1SmartStudy;
+package Sprint1SmartStudy.Test;
 
+import Sprint1SmartStudy.Task;
+import Sprint1SmartStudy.TaskRecurrenceManager;
+import Sprint1SmartStudy.GraphicalTaskDisplayPanel;
 import java.util.ArrayList;
 
 public class TaskAppUnitTest {
@@ -28,10 +31,10 @@ public class TaskAppUnitTest {
         }
     }
 
-    private static void testMarkCompleteFunction() {
+    private static void testMarkCompleteFunction() throws Exception {
         GraphicalTaskDisplayPanel panel = new GraphicalTaskDisplayPanel();
         panel.setVisible(false);
-        panel.setTasksForTest(new ArrayList<Task>());
+        invokeSetTasksForTest(panel, new ArrayList<Task>());
 
         Task task = new Task(
                 "Finish Assignment",
@@ -42,12 +45,12 @@ public class TaskAppUnitTest {
                 "School",
                 "None");
 
-        panel.addTaskForTest(task);
-        panel.markTaskComplete(0);
+        invokeAddTaskForTest(panel, task);
+        invokeMarkTaskComplete(panel, 0);
 
-        assertEquals("Done", panel.getTasks().get(0).getStatus(), "Expected task status to be Done after marking complete");
-        assertEquals(0, panel.getActiveTaskCount(), "Expected no active tasks after marking complete");
-        assertEquals(1, panel.getCompletedTaskCount(), "Expected one completed task after marking complete");
+        assertEquals("Done", invokeGetTasks(panel).get(0).getStatus(), "Expected task status to be Done after marking complete");
+        assertEquals(0, invokeGetActiveTaskCount(panel), "Expected no active tasks after marking complete");
+        assertEquals(1, invokeGetCompletedTaskCount(panel), "Expected one completed task after marking complete");
     }
 
     private static void testTaskRecurrenceOption() {
@@ -69,7 +72,7 @@ public class TaskAppUnitTest {
         assertEquals("Pending", tasks.get(0).getStatus(), "Expected recurring tasks to start in Pending status");
     }
 
-    private static void testCompletedPanelSeparation() {
+    private static void testCompletedPanelSeparation() throws Exception {
         GraphicalTaskDisplayPanel panel = new GraphicalTaskDisplayPanel();
         panel.setVisible(false);
 
@@ -91,10 +94,47 @@ public class TaskAppUnitTest {
                 "School",
                 "None"));
 
-        panel.setTasksForTest(tasks);
+        invokeSetTasksForTest(panel, tasks);
 
-        assertEquals(1, panel.getActiveTaskCount(), "Expected one active task in UI when one task is pending");
-        assertEquals(1, panel.getCompletedTaskCount(), "Expected one completed task in UI when one task is done");
+        assertEquals(1, invokeGetActiveTaskCount(panel), "Expected one active task in UI when one task is pending");
+        assertEquals(1, invokeGetCompletedTaskCount(panel), "Expected one completed task in UI when one task is done");
+    }
+
+    private static void invokeSetTasksForTest(GraphicalTaskDisplayPanel panel, ArrayList<Task> tasks) throws Exception {
+        java.lang.reflect.Method method = GraphicalTaskDisplayPanel.class.getDeclaredMethod("setTasksForTest", ArrayList.class);
+        method.setAccessible(true);
+        method.invoke(panel, tasks);
+    }
+
+    private static void invokeAddTaskForTest(GraphicalTaskDisplayPanel panel, Task task) throws Exception {
+        java.lang.reflect.Method method = GraphicalTaskDisplayPanel.class.getDeclaredMethod("addTaskForTest", Task.class);
+        method.setAccessible(true);
+        method.invoke(panel, task);
+    }
+
+    private static void invokeMarkTaskComplete(GraphicalTaskDisplayPanel panel, int modelRow) throws Exception {
+        java.lang.reflect.Method method = GraphicalTaskDisplayPanel.class.getDeclaredMethod("markTaskComplete", int.class);
+        method.setAccessible(true);
+        method.invoke(panel, modelRow);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static ArrayList<Task> invokeGetTasks(GraphicalTaskDisplayPanel panel) throws Exception {
+        java.lang.reflect.Method method = GraphicalTaskDisplayPanel.class.getDeclaredMethod("getTasks");
+        method.setAccessible(true);
+        return (ArrayList<Task>) method.invoke(panel);
+    }
+
+    private static int invokeGetActiveTaskCount(GraphicalTaskDisplayPanel panel) throws Exception {
+        java.lang.reflect.Method method = GraphicalTaskDisplayPanel.class.getDeclaredMethod("getActiveTaskCount");
+        method.setAccessible(true);
+        return (int) method.invoke(panel);
+    }
+
+    private static int invokeGetCompletedTaskCount(GraphicalTaskDisplayPanel panel) throws Exception {
+        java.lang.reflect.Method method = GraphicalTaskDisplayPanel.class.getDeclaredMethod("getCompletedTaskCount");
+        method.setAccessible(true);
+        return (int) method.invoke(panel);
     }
 
     private static void assertEquals(Object expected, Object actual, String message) {

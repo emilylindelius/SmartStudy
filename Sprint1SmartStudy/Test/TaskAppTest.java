@@ -1,6 +1,6 @@
-package Sprint1SmartStudy;
+package Sprint1SmartStudy.Test;
+
 import java.io.File;
-import java.io.IOException;
 
 public class TaskAppTest {
 
@@ -33,30 +33,33 @@ public class TaskAppTest {
     }
 
     // Test 1: valid task creation should succeed
-    private static void testValidTaskCreation() {
-        SmartStudyPlanner.TaskService service = new SmartStudyPlanner.TaskService();
+    private static void testValidTaskCreation() throws Exception {
+        Object service = createTaskService();
 
-        boolean result = service.addTask("Homework", "High");
+        boolean result = invokeAddTask(service, "Homework", "High");
         assertTrue(result, "Expected addTask to return true");
-        assertEquals(1, service.getTasks().size(), "Expected one task created");
-        assertEquals("Homework", service.getTasks().get(0).getName(), "Expected task name");
-        assertEquals("High", service.getTasks().get(0).getPriority(), "Expected task priority");
+        java.util.List<?> tasks = invokeGetTasks(service);
+        assertEquals(1, tasks.size(), "Expected one task created");
+        Object task = tasks.get(0);
+        assertEquals("Homework", invokeGet(task, "getName"), "Expected task name");
+        assertEquals("High", invokeGet(task, "getPriority"), "Expected task priority");
     }
 
     // Test 2: empty task name should be rejected
-    private static void testEmptyNameRejected() {
-        SmartStudyPlanner.TaskService service = new SmartStudyPlanner.TaskService();
+    private static void testEmptyNameRejected() throws Exception {
+        Object service = createTaskService();
 
-        boolean result = service.addTask("", "Medium");
+        boolean result = invokeAddTask(service, "", "Medium");
         assertFalse(result, "Expected addTask to return false for empty name");
-        assertEquals(0, service.getTasks().size(), "Expected no tasks created");
+        java.util.List<?> tasks = invokeGetTasks(service);
+        assertEquals(0, tasks.size(), "Expected no tasks created");
     }
 
     // Test 3: saving tasks should create a file
-    private static void testSaveCreatesFile() throws IOException {
-        SmartStudyPlanner.TaskService service = new SmartStudyPlanner.TaskService();
-        service.addTask("Study", "Low");
-        service.saveToFile(TEST_FILE);
+    private static void testSaveCreatesFile() throws Exception {
+        Object service = createTaskService();
+        invokeAddTask(service, "Study", "Low");
+        invokeSaveToFile(service, TEST_FILE);
 
         File file = new File(TEST_FILE);
         assertTrue(file.exists(), "Expected saveToFile to create the file");
@@ -64,17 +67,57 @@ public class TaskAppTest {
     }
 
     // Test 4: loading from file should restore saved task
-    private static void testLoadRestoresTask() throws IOException {
-        SmartStudyPlanner.TaskService service = new SmartStudyPlanner.TaskService();
-        service.addTask("Read Book", "Low");
-        service.saveToFile(TEST_FILE);
+    private static void testLoadRestoresTask() throws Exception {
+        Object service = createTaskService();
+        invokeAddTask(service, "Read Book", "Low");
+        invokeSaveToFile(service, TEST_FILE);
 
-        SmartStudyPlanner.TaskService loadedService = new SmartStudyPlanner.TaskService();
-        loadedService.loadFromFile(TEST_FILE);
+        Object loadedService = createTaskService();
+        invokeLoadFromFile(loadedService, TEST_FILE);
 
-        assertEquals(1, loadedService.getTasks().size(), "Expected one task loaded");
-        assertEquals("Read Book", loadedService.getTasks().get(0).getName(), "Expected restored name");
-        assertEquals("Low", loadedService.getTasks().get(0).getPriority(), "Expected restored priority");
+        java.util.List<?> tasks = invokeGetTasks(loadedService);
+        assertEquals(1, tasks.size(), "Expected one task loaded");
+        Object task = tasks.get(0);
+        assertEquals("Read Book", invokeGet(task, "getName"), "Expected restored name");
+        assertEquals("Low", invokeGet(task, "getPriority"), "Expected restored priority");
+    }
+
+    // Reflection helpers to access non-public nested TaskService
+    private static Object createTaskService() throws Exception {
+        Class<?> cls = Class.forName("Sprint1SmartStudy.SmartStudyPlanner$TaskService");
+        java.lang.reflect.Constructor<?> ctor = cls.getDeclaredConstructor();
+        ctor.setAccessible(true);
+        return ctor.newInstance();
+    }
+
+    private static boolean invokeAddTask(Object service, String name, String priority) throws Exception {
+        java.lang.reflect.Method m = service.getClass().getDeclaredMethod("addTask", String.class, String.class);
+        m.setAccessible(true);
+        return (boolean) m.invoke(service, name, priority);
+    }
+
+    private static java.util.List<?> invokeGetTasks(Object service) throws Exception {
+        java.lang.reflect.Method m = service.getClass().getDeclaredMethod("getTasks");
+        m.setAccessible(true);
+        return (java.util.List<?>) m.invoke(service);
+    }
+
+    private static void invokeSaveToFile(Object service, String file) throws Exception {
+        java.lang.reflect.Method m = service.getClass().getDeclaredMethod("saveToFile", String.class);
+        m.setAccessible(true);
+        m.invoke(service, file);
+    }
+
+    private static void invokeLoadFromFile(Object service, String file) throws Exception {
+        java.lang.reflect.Method m = service.getClass().getDeclaredMethod("loadFromFile", String.class);
+        m.setAccessible(true);
+        m.invoke(service, file);
+    }
+
+    private static Object invokeGet(Object obj, String method) throws Exception {
+        java.lang.reflect.Method m = obj.getClass().getMethod(method);
+        m.setAccessible(true);
+        return m.invoke(obj);
     }
 
     private static void cleanup() {
