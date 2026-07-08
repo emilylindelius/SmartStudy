@@ -37,14 +37,12 @@ public class TaskStorage {
     public static File getStorageFile() {
         File preferredFile = new File(
                 getStorageDirectory(), FILE_NAME);
-        File legacyFile = new File(FILE_NAME);
 
-        if (preferredFile.exists()) {
-            return preferredFile;
-        }
-
-        if (legacyFile.exists()) {
-            return legacyFile;
+        if (!preferredFile.exists()) {
+            File legacyFile = new File(FILE_NAME);
+            if (legacyFile.exists()) {
+                legacyFile.renameTo(preferredFile);
+            }
         }
 
         return preferredFile;
@@ -55,64 +53,53 @@ public class TaskStorage {
     }
 
     // SAVE ALL TASKS TO STRUCTURED TEXT FILE
-    public static void saveTasks(
-            ArrayList<Task> tasks) {
+    public static void saveTasks(ArrayList<Task> tasks) {
 
         File tempFile = getTempStorageFile();
         File realFile = getStorageFile();
 
-        try (FileWriter writer =
-                     new FileWriter(tempFile)) {
+        System.out.println("=== SAVE DEBUG ===");
+        System.out.println("Storage directory: " + getStorageDirectory().getAbsolutePath());
+        System.out.println("Directory exists? " + getStorageDirectory().exists());
+        System.out.println("Target file: " + realFile.getAbsolutePath());
+        System.out.println("Number of tasks to save: " + tasks.size());
 
-            SimpleDateFormat sdf =
-                    new SimpleDateFormat(
-                            "MM/dd/yyyy");
-            String createdAt =
-                    sdf.format(new Date());
+        try (FileWriter writer = new FileWriter(tempFile)) {
+
+            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+            String createdAt = sdf.format(new Date());
 
             for (Task task : tasks) {
-
-                writer.write("task_name="
-                        + task.getTaskName()
-                        + System.lineSeparator());
-                writer.write("priority="
-                        + task.getPriority()
-                        + System.lineSeparator());
-                writer.write("due_date="
-                        + task.getDueDate()
-                        + System.lineSeparator());
-                writer.write("status="
-                        + task.getStatus()
-                        + System.lineSeparator());
-                writer.write("created_at="
-                        + createdAt
-                        + System.lineSeparator());
-                writer.write("---"
-                        + System.lineSeparator());
-                
-                writer.write("category="
-                		+ task.getCategory()
-                		+ System.lineSeparator());
-                writer.write("recurrence="
-                		+ task.getRecurrence()
-                		+ System.lineSeparator());
-                writer.write("---"
-                		+ System.lineSeparator());
-                
+                writer.write("task_name=" + task.getTaskName() + System.lineSeparator());
+                writer.write("priority=" + task.getPriority() + System.lineSeparator());
+                writer.write("due_date=" + task.getDueDate() + System.lineSeparator());
+                writer.write("status=" + task.getStatus() + System.lineSeparator());
+                writer.write("created_at=" + createdAt + System.lineSeparator());
+                writer.write("category=" + task.getCategory() + System.lineSeparator());
+                writer.write("recurrence=" + task.getRecurrence() + System.lineSeparator());
+                writer.write("---" + System.lineSeparator());
             }
 
             writer.flush();
 
-            if (realFile.exists()) {
-                realFile.delete();
-            }
-
-            tempFile.renameTo(realFile);
-
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(null,
-                    "Error saving tasks.");
+            System.out.println("SAVE FAILED WRITING TEMP FILE:");
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error saving tasks: " + e.getMessage());
+            return;
         }
+
+        System.out.println("Temp file written? " + tempFile.exists() + " size=" + tempFile.length());
+
+        if (realFile.exists()) {
+            boolean deleted = realFile.delete();
+            System.out.println("Old real file deleted? " + deleted);
+        }
+
+        boolean renamed = tempFile.renameTo(realFile);
+        System.out.println("Renamed temp to real? " + renamed);
+        System.out.println("Real file exists after rename? " + realFile.exists());
+        System.out.println("=== END SAVE DEBUG ===");
     }
 
     // LOAD ALL TASKS FROM STRUCTURED TEXT FILE
@@ -201,7 +188,7 @@ public class TaskStorage {
                     status     = "Pending";
                     createdAt  = "";
                     category   = "General";
-                    recurrence = "Nonse";
+                    recurrence = "None";
                 }
             }
 
