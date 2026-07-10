@@ -1,0 +1,68 @@
+name: Build Installers
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Install NSIS
+        run: choco install nsis -y
+
+      - name: Compile
+        run: |
+          mkdir out
+          javac -d out Sprint1SmartStudy/*.java
+
+      - name: Build jar
+        run: |
+          cd out
+          jar --create --file ../SmartStudy.jar --main-class TaskApp .
+
+      - name: Package installer
+        run: |
+          jpackage --input . --name SmartStudy --main-jar SmartStudy.jar --main-class TaskApp --type exe --win-shortcut --win-menu --app-version 1.0.0
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SmartStudy-windows-installer
+          path: '*.exe'
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Compile
+        run: |
+          mkdir out
+          javac -d out Sprint1SmartStudy/*.java
+
+      - name: Build jar
+        run: |
+          cd out
+          jar --create --file ../SmartStudy.jar --main-class TaskApp .
+
+      - name: Package installer
+        run: |
+          jpackage --input . --name SmartStudy --main-jar SmartStudy.jar --main-class TaskApp --type dmg --app-version 1.0.0
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SmartStudy-macos-installer
+          path: '*.dmg'
